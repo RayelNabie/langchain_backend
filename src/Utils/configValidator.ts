@@ -1,22 +1,29 @@
 import { databaseConfig } from '#Config/database.js';
+import { openaiConfig } from '#Config/openai.js';
 
-/**
- * Guard Clause: Valideer de configuratie (Fail fast)
- */
-export const validateConfig = (): void => {
+export const validateConfig: () => void = (): void => {
   if (!databaseConfig?.details?.source || !databaseConfig?.safeUrl) {
-    throw new Error('[Config] Database configuratie ontbreekt of is corrupt.');
+    throw new Error('[Config] Database config is not available');
+  }
+
+  if (!openaiConfig.azureApiKey.value) {
+    throw new Error('[Config] OpenAI API key is missing.');
+  }
+  if (!openaiConfig.azureInstanceName.value) {
+    throw new Error('[Config] Azure OpenAI Instance Name is missing.');
+  }
+  if (!openaiConfig.azureDeploymentName.value) {
+    throw new Error('[Config] Azure OpenAI Deployment Name is missing.');
   }
 
   const isProduction = process.env.NODE_ENV === 'production';
   const usesDefault = databaseConfig.details.source.includes('default');
 
-  // Harde block als we in productie zijn met default credentials (Negative space)
+  // block local db credentials in production
   if (isProduction && usesDefault) {
-    throw new Error('[Security] FATAL: Default database credentials in productie!');
+    throw new Error('[Security] FATAL: Default database credentials in production!');
   }
 
-  // Zachte waarschuwing in dev
   if (!isProduction && usesDefault) {
     console.warn('[Security] Warning: Using default database credentials locally.');
   }
