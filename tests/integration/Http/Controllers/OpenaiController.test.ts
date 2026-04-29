@@ -20,9 +20,15 @@ describe('OpenaiController', () => {
       expect(response.status).toBe(200);
       expect(response.text).toBe('Hello World!');
     });
+
+    it('should return 404 for non-existent routes', async () => {
+      const response = await request(app).get('/non-existent');
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({ error: 'Route not found' });
+    });
   });
 
-  describe('POST /ask', () => {
+  describe('POST /ai/ask', () => {
     it('should return 200 and AI response for a valid prompt (happy flow)', async () => {
       const mockResponse = {
         content: 'Hello, I am an AI!',
@@ -38,7 +44,7 @@ describe('OpenaiController', () => {
 
       vi.mocked(OpenAi.ask).mockResolvedValue(mockResponse);
 
-      const response = await request(app).post('/ask').send({ prompt: 'Hello' });
+      const response = await request(app).post('/ai/ask').send({ prompt: 'Hello' });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockResponse);
@@ -46,7 +52,7 @@ describe('OpenaiController', () => {
     });
 
     it('should return 400 if prompt is missing (unhappy flow)', async () => {
-      const response = await request(app).post('/ask').send({});
+      const response = await request(app).post('/ai/ask').send({});
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ error: 'prompt cannot be empty' });
@@ -57,7 +63,7 @@ describe('OpenaiController', () => {
       const errorMessage = 'AI Service Unavailable';
       vi.mocked(OpenAi.ask).mockRejectedValue(new Error(errorMessage));
 
-      const response = await request(app).post('/ask').send({ prompt: 'Hello' });
+      const response = await request(app).post('/ai/ask').send({ prompt: 'Hello' });
 
       expect(response.status).toBe(500);
       expect(response.body).toEqual({

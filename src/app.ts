@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Express } from 'express';
 import { setupSwagger } from '#Config/swagger.js';
-import webRoutes from '#Routes/web.js';
+import appRouter from '#Routes/web.js';
 import { validateConfig } from '#Utils/configValidator.js';
 import { connectDatabase } from '#Utils/database.js';
 
@@ -12,10 +12,9 @@ const port: string | 3000 = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-setupSwagger(app);
-
 /** Routes */
-app.use('/', webRoutes);
+setupSwagger(app);
+app.use('/', appRouter);
 
 const bootstrap: () => Promise<void> = async (): Promise<void> => {
   try {
