@@ -1,19 +1,31 @@
 import { getSecret, type SecretResult } from '#Utils/secrets.js';
 
-export const openaiConfig = {
+interface OpenAiConfig {
+  azureApiKey: SecretResult;
+  azureInstanceName: SecretResult;
+  azureDeploymentName: SecretResult;
+  azureApiVersion: SecretResult;
+  azureEmbeddingsDeploymentName: SecretResult;
+}
+
+export const openaiConfig: OpenAiConfig = {
   get azureApiKey(): SecretResult {
     return getSecret('azure_openai_api_key', '');
   },
 
   get azureInstanceName(): SecretResult {
-    return getSecret('azure_openai_instance_name', '');
+    return getSecret('azure_openai_api_instance_name', '');
   },
 
   get azureDeploymentName(): SecretResult {
-    return getSecret('azure_openai_deployment_name', '');
+    return getSecret('azure_openai_api_deployment_name', '');
   },
 
   get azureApiVersion(): SecretResult {
-    return getSecret('azure_openai_api_version', '2024-02-01');
+    return getSecret('azure_openai_api_version', '2025-03-01-preview');
+  },
+
+  get azureEmbeddingsDeploymentName(): SecretResult {
+    return getSecret('azure_openai_api_embeddings_deployment_name', '');
   },
 };
