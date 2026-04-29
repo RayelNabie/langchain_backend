@@ -6,18 +6,23 @@ export const validateConfig: () => void = (): void => {
     throw new Error('[Config] Database config is not available');
   }
 
-  if (!openaiConfig.azureApiKey.value) {
-    throw new Error('[Config] OpenAI API key is missing.');
-  }
-  if (!openaiConfig.azureInstanceName.value) {
-    throw new Error('[Config] Azure OpenAI Instance Name is missing.');
-  }
-  if (!openaiConfig.azureDeploymentName.value) {
-    throw new Error('[Config] Azure OpenAI Deployment Name is missing.');
+  const isProduction: boolean = process.env.NODE_ENV === 'production';
+  const hasOpenAiConfig: boolean =
+    !!openaiConfig.azureApiKey.value &&
+    !!openaiConfig.azureInstanceName.value &&
+    !!openaiConfig.azureDeploymentName.value;
+
+  if (!hasOpenAiConfig) {
+    if (isProduction) {
+      throw new Error('[Config] OpenAI/Azure configuration is missing!');
+    } else {
+      console.warn(
+        '[Config] WARNING: OpenAI/Azure configuration is missing. AI features will fail.',
+      );
+    }
   }
 
-  const isProduction = process.env.NODE_ENV === 'production';
-  const usesDefault = databaseConfig.details.source.includes('default');
+  const usesDefault: boolean = databaseConfig.details.source.includes('default');
 
   // block local db credentials in production
   if (isProduction && usesDefault) {

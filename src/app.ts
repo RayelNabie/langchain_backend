@@ -1,5 +1,6 @@
 import express from 'express';
 import type { Express } from 'express';
+import { setupSwagger } from '#Config/swagger.js';
 import webRoutes from '#Routes/web.js';
 import { validateConfig } from '#Utils/configValidator.js';
 import { connectDatabase } from '#Utils/database.js';
@@ -16,6 +17,8 @@ const bootstrap: () => Promise<void> = async (): Promise<void> => {
     /** Middlewares */
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+
+    setupSwagger(app);
 
     /** Routes */
     app.use('/', webRoutes);
