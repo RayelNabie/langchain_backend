@@ -3,13 +3,6 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-      target: builder
-      args:
-        NODE_VERSION: 24
-    command: yarn run dev
-    volumes:
-      - .:/app/
-      - /app/node_modules
     ports:
       - '3000:3000'
     depends_on:
@@ -32,8 +25,7 @@ services:
       - pg_user
       - pg_pw
     volumes:
-      - ./data:/var/lib/postgresql
-      - ./logs:/var/log/postgresql
+      - postgres_data:/var/lib/postgresql/data
     command: >
       postgres -c logging_collector=on
                -c log_directory=/var/log/postgresql
@@ -52,6 +44,10 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
+
+volumes:
+  postgres_data:
+
 secrets:
   pg_user:
     file: ./secrets/pg_user.txt

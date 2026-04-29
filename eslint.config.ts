@@ -1,28 +1,26 @@
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import {defineConfig} from 'eslint/config';
-import stylisticTs from '@stylistic/eslint-plugin-ts';
+import { defineConfig } from 'eslint/config';
+import prettierPlugin from 'eslint-plugin-prettier';
+import prettierConfig from 'eslint-config-prettier';
 
 export default defineConfig([
   {
+    ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', 'src/types/**'],
+  },
+  {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
-    ignores: [
-      '**/node_modules/**',
-      '**/dist/**',
-      'src/types/**',
-    ],
     plugins: {
       js,
-      '@stylistic/ts': stylisticTs,
+      prettier: prettierPlugin,
     },
     extends: ['js/recommended'],
-    languageOptions: {globals: globals.browser},
+    languageOptions: { globals: globals.node },
     rules: {
-      '@stylistic/ts/indent': ['error', 2],
-      '@stylistic/ts/quotes': ['error', 'single'],
-      '@stylistic/ts/semi': ['error', 'always'],
+      'prettier/prettier': 'error',
     },
   },
   tseslint.configs.recommended,
+  prettierConfig,
 ]);
