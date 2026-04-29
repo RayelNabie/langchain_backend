@@ -8,20 +8,20 @@ import { connectDatabase } from '#Utils/database.js';
 const app: Express = express();
 const port: string | 3000 = process.env.PORT || 3000;
 
+/** Middlewares */
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+setupSwagger(app);
+
+/** Routes */
+app.use('/', webRoutes);
+
 const bootstrap: () => Promise<void> = async (): Promise<void> => {
   try {
     validateConfig();
 
     await connectDatabase();
-
-    /** Middlewares */
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-
-    setupSwagger(app);
-
-    /** Routes */
-    app.use('/', webRoutes);
 
     /** Start server */
     app.listen(port, (): void => {
@@ -38,4 +38,8 @@ const bootstrap: () => Promise<void> = async (): Promise<void> => {
   }
 };
 
-bootstrap();
+if (process.env.NODE_ENV !== 'test') {
+  bootstrap();
+}
+
+export default app;

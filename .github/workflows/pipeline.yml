@@ -2,9 +2,9 @@ name: Optimized CI/CD Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -15,6 +15,6 @@ jobs:
     uses: ./.github/workflows/lint.yml
     needs: setup
 
-  # test:
-  #   uses: ./.github/workflows/test.yml
-  #   needs: setup
+  test:
+    uses: ./.github/workflows/test.yml
+    needs: setup
