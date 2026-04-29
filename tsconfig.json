@@ -1,21 +1,25 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ES2022",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
-    "moduleResolution": "bundler",
-    "outDir": "dist",
-    "importsNotUsedAsValues": "remove",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./build",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noUncheckedIndexedAccess": true,
-    "types": ["vitest/globals"]
+    "sourceMap": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "#*": ["src/*"]
+    }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "build"],
+  "ts-node": {
+    "esm": true
+  }
 }

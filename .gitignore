@@ -132,6 +132,7 @@ dist
 secrets/
 certs/
 data/
+build
 
 #editor settings
 .vscode
