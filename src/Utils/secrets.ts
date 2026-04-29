@@ -10,8 +10,8 @@ export interface SecretResult {
  * Get secret from docker secrets, local secrets, or environment vars
  */
 export const getSecret = (secretName: string, fallback: string): SecretResult => {
-  const dockerSecretPath = path.join('/run/secrets', secretName);
-  const localSecretPath = path.join(process.cwd(), 'secrets', `${secretName}.txt`);
+  const dockerSecretPath: string = path.join('/run/secrets', secretName);
+  const localSecretPath: string = path.join(process.cwd(), 'secrets', `${secretName}.txt`);
 
   /**
    * 1. Try Docker secrets
@@ -38,7 +38,7 @@ export const getSecret = (secretName: string, fallback: string): SecretResult =>
   /**
    * 3. Fallback to environment vars
    */
-  const envVarName = secretName.toUpperCase();
+  const envVarName: string = secretName.toUpperCase();
   if (process.env[envVarName]) {
     return { value: process.env[envVarName] as string, source: 'env-var' };
   }
