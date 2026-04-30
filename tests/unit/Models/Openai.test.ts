@@ -9,6 +9,7 @@ vi.mock('@langchain/openai', () => {
     AzureChatOpenAI: vi.fn().mockImplementation(function () {
       return {
         invoke: vi.fn(),
+        stream: vi.fn(),
       };
     }),
   };
@@ -83,5 +84,35 @@ describe('OpenAi Model', () => {
     const systemMessage = mockInvoke.mock.calls[0][0][0] as SystemMessage;
     expect(systemMessage.content).toContain('AI Coach');
     expect(systemMessage.content).toContain('voetbal-app');
+  });
+
+  it('should call stream and return an async iterable', async () => {
+    openaiConfig.azureApiKey.value = 'valid-key';
+
+    const mockStream = vi.fn().mockResolvedValue({
+      [Symbol.asyncIterator]: async function* () {
+        yield { content: 'Chunk 1', response_metadata: {} };
+        yield { content: 'Chunk 2', response_metadata: {} };
+      },
+    });
+
+    vi.mocked(AzureChatOpenAI).mockImplementation(function () {
+      return {
+        stream: mockStream,
+      } as never;
+    });
+
+    const stream = await OpenAi.stream('Hello AI');
+    const chunks = [];
+    for await (const chunk of stream) {
+      chunks.push(chunk);
+    }
+
+    expect(chunks).toHaveLength(2);
+    expect(chunks[0].content).toBe('Chunk 1');
+    expect(mockStream).toHaveBeenCalledWith([
+      expect.any(SystemMessage),
+      new HumanMessage('Hello AI'),
+    ]);
   });
 });

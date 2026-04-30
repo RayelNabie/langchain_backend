@@ -7,6 +7,7 @@ import type OpenaiResponse from '#Types/OpenaiResponse.js';
 vi.mock('#Models/Openai.js', () => ({
   default: {
     ask: vi.fn(),
+    stream: vi.fn(),
   },
 }));
 
@@ -36,6 +37,28 @@ describe('OpenaiController', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockResponse);
       expect(OpenAi.ask).toHaveBeenCalledWith('Hello');
+    });
+
+    it('should return SSE stream if stream is true', async () => {
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield { content: 'Chunk 1', response_metadata: {} };
+          yield { content: 'Chunk 2', response_metadata: {} };
+        },
+      };
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      vi.mocked(OpenAi.stream).mockResolvedValue(mockStream);
+
+      const response = await request(app).post('/ask').send({ prompt: 'Hello', stream: true });
+
+      expect(response.status).toBe(200);
+      expect(response.header['content-type']).toContain('text/event-stream');
+      expect(response.text).toContain('data: {"content":"Chunk 1","metadata":{}}');
+      expect(response.text).toContain('data: {"content":"Chunk 2","metadata":{}}');
+      expect(response.text).toContain('event: end');
+      expect(OpenAi.stream).toHaveBeenCalledWith('Hello');
     });
 
     it('should return 400 if prompt is missing (unhappy flow)', async () => {
