@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AzureChatOpenAI } from '@langchain/openai';
-import { AIMessage } from '@langchain/core/messages';
+import { AIMessage, SystemMessage, HumanMessage } from '@langchain/core/messages';
 import OpenAi from '#Models/Openai.js';
 import { openaiConfig } from '#Config/openai.js';
 
@@ -75,6 +75,13 @@ describe('OpenAi Model', () => {
       output_tokens: 5,
       total_tokens: 10,
     });
-    expect(mockInvoke).toHaveBeenCalledWith('Hello AI');
+    expect(mockInvoke).toHaveBeenCalledWith([
+      expect.any(SystemMessage),
+      new HumanMessage('Hello AI'),
+    ]);
+
+    const systemMessage = mockInvoke.mock.calls[0][0][0] as SystemMessage;
+    expect(systemMessage.content).toContain('AI Coach');
+    expect(systemMessage.content).toContain('voetbal-app');
   });
 });
