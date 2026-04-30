@@ -1,24 +1,26 @@
 import express from 'express';
 import type { Express } from 'express';
-import webRoutes from '#Routes/web.js';
+import { setupSwagger } from '#Config/swagger.js';
+import appRouter from '#Routes/web.js';
 import { validateConfig } from '#Utils/configValidator.js';
 import { connectDatabase } from '#Utils/database.js';
 
 const app: Express = express();
 const port: string | 3000 = process.env.PORT || 3000;
 
+/** Middlewares */
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+/** Routes */
+setupSwagger(app);
+app.use('/', appRouter);
+
 const bootstrap: () => Promise<void> = async (): Promise<void> => {
   try {
     validateConfig();
 
     await connectDatabase();
-
-    /** Middlewares */
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-
-    /** Routes */
-    app.use('/', webRoutes);
 
     /** Start server */
     app.listen(port, (): void => {
@@ -35,4 +37,8 @@ const bootstrap: () => Promise<void> = async (): Promise<void> => {
   }
 };
 
-bootstrap();
+if (process.env.NODE_ENV !== 'test') {
+  bootstrap();
+}
+
+export default app;

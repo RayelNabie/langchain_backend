@@ -1,10 +1,19 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import openaiRoutes from '#Routes/openai.routes.js';
 
-const router = Router();
+const appRouter: Router = Router();
 
-router.get('/', (req: Request, res: Response): void => {
-  res.send('Hello World!');
+/**
+ * Register specific routes
+ */
+appRouter.use('/', openaiRoutes);
+
+/**
+ * Fallback for non-existent routes
+ */
+appRouter.use((req: Request, res: Response): void => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
-export default router;
+export default appRouter;

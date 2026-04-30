@@ -1,18 +1,14 @@
 import { databaseConfig } from '#Config/database.js';
 
-/**
- * Verantwoordelijk voor enkel de database connectie
- */
-export const connectDatabase = async (): Promise<void> => {
+export const connectDatabase: () => void = async (): Promise<void> => {
   const {
     safeUrl,
     details: { source },
-  } = databaseConfig;
+  }: { safeUrl: string; details: { source: string } } = databaseConfig;
 
   console.log(`[Database] Attempting connection via: ${source} to ${safeUrl}`);
 
   // await myDbClient.connect();
-  // Als dit faalt, gooit myDbClient zelf een error die we hogerop vangen.
 
   console.log('[Database] Connection established successfully.');
 };

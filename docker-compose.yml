@@ -18,6 +18,11 @@ services:
     secrets:
       - pg_user
       - pg_pw
+      - azure_openai_api_key
+      - azure_openai_api_instance_name
+      - azure_openai_api_deployment_name
+      - azure_openai_api_version
+      - azure_openai_api_embeddings_deployment_name
   postgres:
     image: postgres:18.3-alpine
     container_name: postgres
@@ -57,3 +62,13 @@ secrets:
     file: ./secrets/pg_user.txt
   pg_pw:
     file: ./secrets/pg_pw.txt
+  azure_openai_api_key:
+    file: ./secrets/azure_openai_api_key.txt
+  azure_openai_api_instance_name:
+    file: ./secrets/azure_openai_api_instance_name.txt
+  azure_openai_api_deployment_name:
+    file: ./secrets/azure_openai_api_deployment_name.txt
+  azure_openai_api_version:
+    file: ./secrets/azure_openai_api_version.txt
+  azure_openai_api_embeddings_deployment_name:
+    file: ./secrets/azure_openai_api_embeddings_deployment_name.txt
