@@ -1,17 +1,26 @@
 import { AzureChatOpenAI } from '@langchain/openai';
 import {
   BaseMessage,
-  AIMessage,
-  SystemMessage,
-  HumanMessage,
   type BaseMessageChunk,
+  HumanMessage,
+  SystemMessage,
 } from '@langchain/core/messages';
+import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
+import { type RunnableConfig, RunnableWithMessageHistory } from '@langchain/core/runnables';
+import { PostgresChatMessageHistory } from '@langchain/community/stores/message/postgres';
 import { IterableReadableStream } from '@langchain/core/utils/stream';
 import { openaiConfig } from '#Config/openai.js';
-import type OpenaiResponse from '#Types/OpenaiResponse.js';
+import { databaseConfig } from '#Config/database.js';
 
 export default class OpenAi {
   private static instance: AzureChatOpenAI | null = null;
+
+  private static readonly SYSTEM_PROMPT: string =
+    'Je bent de AI Coach van een voetbal-app die spelers helpt bij het tracken en loggen van hun voetbal-drills, vergelijkbaar met de Hevy-app. ' +
+    'Je bent een expert in jeugdvoetbal en baseert je advies op de methodiek van jeugdvoetbalcoach.nl. ' +
+    'Je doel is om spelers te helpen hun techniek, tactiek en conditie te verbeteren door middel van positie-specifiek advies. ' +
+    'Als een speler moeite heeft met een oefening, geef dan directe feedback, praktische tips (zoals standbeen-positie) en stel eventueel een alternatieve basis-oefening voor. ' +
+    'Je toon is motiverend, duidelijk en deskundig.';
 
   public static getInstance(): AzureChatOpenAI {
     if (!this.instance) {
@@ -40,49 +49,91 @@ export default class OpenAi {
   }
 
   /**
-   * Returns the messages array for the AI Coach
+   * Resets the singleton instance (for testing purposes)
    */
-  private static getMessages(prompt: string): BaseMessage[] {
-    return [
-      new SystemMessage(
-        'Je bent de AI Coach van een voetbal-app die spelers helpt bij het tracken en loggen van hun voetbal-drills, vergelijkbaar met de Hevy-app. ' +
-          'Je bent een expert in jeugdvoetbal en baseert je advies op de methodiek van coerver ' +
-          'Je doel is om spelers te helpen hun techniek, tactiek en conditie te verbeteren door middel van positie-specifiek advies. ' +
-          'Als een speler moeite heeft met een oefening, geef dan directe feedback, praktische tips (zoals standbeen-positie) en stel eventueel een alternatieve basis-oefening voor. ' +
-          'Je toon is motiverend, duidelijk en deskundig.',
-      ),
-      new HumanMessage(prompt),
-    ];
+  public static reset(): void {
+    this.instance = null;
+  }
+
+  /**
+   * Returns a ChatMessageHistory instance for a given session
+   */
+  private static async getHistory(sessionId: string): Promise<PostgresChatMessageHistory> {
+    return new PostgresChatMessageHistory({
+      poolConfig: {
+        connectionString: databaseConfig.url,
+      },
+      tableName: 'chat_history',
+      sessionId: sessionId,
+    });
+  }
+
+  /**
+   * Creates a runnable chain with history support
+   */
+  private static getChainWithHistory(): RunnableWithMessageHistory<
+    { input: string },
+    BaseMessageChunk
+  > {
+    const model: AzureChatOpenAI = this.getInstance();
+
+    const prompt: ChatPromptTemplate = ChatPromptTemplate.fromMessages([
+      ['system', this.SYSTEM_PROMPT],
+      new MessagesPlaceholder('history'),
+      ['human', '{input}'],
+    ]);
+
+    const chain = prompt.pipe(model);
+
+    return new RunnableWithMessageHistory<{ input: string }, BaseMessageChunk>({
+      runnable: chain,
+      getMessageHistory: (sessionId: string) => this.getHistory(sessionId),
+      inputMessagesKey: 'input',
+      historyMessagesKey: 'history',
+    });
   }
 
   /**
    * Sends a prompt to OpenAI and returns the response
    */
-  public static async ask(prompt: string): Promise<OpenaiResponse> {
-    const model: AzureChatOpenAI = this.getInstance();
-    const messages: BaseMessage[] = this.getMessages(prompt);
-
-    const response: BaseMessage = await model.invoke(messages);
-
-    const result: OpenaiResponse = {
-      answer: response.content,
-      metadata: response.response_metadata,
-    };
-
-    if (AIMessage.isInstance(response)) {
-      result.usage = response.usage_metadata;
+  public static async ask(prompt: string, sessionId?: string): Promise<BaseMessage> {
+    if (!sessionId) {
+      // Fallback to simple invocation without history if no sessionId is provided
+      const model: AzureChatOpenAI = this.getInstance();
+      const messages: BaseMessage[] = [
+        new SystemMessage(this.SYSTEM_PROMPT),
+        new HumanMessage(prompt),
+      ];
+      return await model.invoke(messages);
     }
 
-    return result;
+    const chain: RunnableWithMessageHistory<{ input: string }, BaseMessageChunk> =
+      this.getChainWithHistory();
+    const config: RunnableConfig = { configurable: { sessionId } };
+
+    return await chain.invoke({ input: prompt }, config);
   }
 
   /**
    * Streams the response from OpenAI
    */
-  public static async stream(prompt: string): Promise<IterableReadableStream<BaseMessageChunk>> {
-    const model: AzureChatOpenAI = this.getInstance();
-    const messages: BaseMessage[] = this.getMessages(prompt);
+  public static async stream(
+    prompt: string,
+    sessionId?: string,
+  ): Promise<IterableReadableStream<BaseMessageChunk>> {
+    if (!sessionId) {
+      const model: AzureChatOpenAI = this.getInstance();
+      const messages: BaseMessage[] = [
+        new SystemMessage(this.SYSTEM_PROMPT),
+        new HumanMessage(prompt),
+      ];
+      return model.stream(messages);
+    }
 
-    return model.stream(messages);
+    const chain: RunnableWithMessageHistory<{ input: string }, BaseMessageChunk> =
+      this.getChainWithHistory();
+    const config: RunnableConfig = { configurable: { sessionId } };
+
+    return chain.stream({ input: prompt }, config);
   }
 }
