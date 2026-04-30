@@ -1,15 +1,32 @@
 import { Request, Response } from 'express';
+import {
+  AIMessage,
+  type BaseMessage,
+  type BaseMessageChunk,
+  type ResponseMetadata,
+  type UsageMetadata,
+} from '@langchain/core/messages';
 import OpenAi from '#Models/Openai.js';
-import type OpenaiResponse from '#Types/OpenaiResponse.js';
 import type AskRequest from '#Types/AskRequest.js';
+
+type AskResponse =
+  | {
+      answer: BaseMessage['content'];
+      metadata: ResponseMetadata;
+      usage?: UsageMetadata;
+    }
+  | { error: string; details?: string };
 
 export class OpenaiController {
   /**
    * Handles the /ask requests
    */
-  public static async ask(req: Request, res: Response): Promise<void> {
+  public static async ask(
+    req: Request<Record<string, string>, AskResponse, AskRequest>,
+    res: Response<AskResponse>,
+  ): Promise<void> {
     try {
-      const { prompt, stream }: AskRequest = req.body;
+      const { prompt, stream, sessionId } = req.body;
 
       if (!prompt) {
         res.status(400).json({ error: 'prompt cannot be empty' });
@@ -22,7 +39,10 @@ export class OpenaiController {
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
-        const streamResponse = await OpenAi.stream(prompt);
+        const streamResponse: AsyncIterable<BaseMessageChunk> = await OpenAi.stream(
+          prompt,
+          sessionId,
+        );
 
         for await (const chunk of streamResponse) {
           const data: string = JSON.stringify({
@@ -37,9 +57,13 @@ export class OpenaiController {
         return;
       }
 
-      const result: OpenaiResponse = await OpenAi.ask(prompt);
+      const result: BaseMessage = await OpenAi.ask(prompt, sessionId);
 
-      res.json(result);
+      res.json({
+        answer: result.content,
+        metadata: result.response_metadata,
+        usage: AIMessage.isInstance(result) ? result.usage_metadata : undefined,
+      });
     } catch (error: unknown) {
       const message: string = error instanceof Error ? error.message : String(error);
 

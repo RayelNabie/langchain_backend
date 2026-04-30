@@ -39,8 +39,9 @@ export const getSecret = (secretName: string, fallback: string): SecretResult =>
    * 3. Fallback to environment vars
    */
   const envVarName: string = secretName.toUpperCase();
-  if (process.env[envVarName]) {
-    return { value: process.env[envVarName] as string, source: 'env-var' };
+  const envVal: string | undefined = process.env[envVarName];
+  if (envVal !== undefined) {
+    return { value: envVal, source: 'env-var' };
   }
 
   return { value: fallback, source: 'default' };
