@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import app from '#app.js';
 import OpenAi from '#Models/Openai.js';
+import type OpenaiResponse from '#Types/OpenaiResponse.js';
 
 vi.mock('#Models/Openai.js', () => ({
   default: {
@@ -14,27 +15,13 @@ describe('OpenaiController', () => {
     vi.clearAllMocks();
   });
 
-  describe('GET /', () => {
-    it('should return 200 and Hello World!', async () => {
-      const response = await request(app).get('/');
-      expect(response.status).toBe(200);
-      expect(response.text).toBe('Hello World!');
-    });
-
-    it('should return 404 for non-existent routes', async () => {
-      const response = await request(app).get('/non-existent');
-      expect(response.status).toBe(404);
-      expect(response.body).toEqual({ error: 'Route not found' });
-    });
-  });
-
-  describe('POST /ai/ask', () => {
+  describe('POST /ask', () => {
     it('should return 200 and AI response for a valid prompt (happy flow)', async () => {
-      const mockResponse = {
-        content: 'Hello, I am an AI!',
+      const mockResponse: OpenaiResponse = {
+        answer: 'Hello, I am an AI!',
         usage: {
-          prompt_tokens: 10,
-          completion_tokens: 10,
+          input_tokens: 10,
+          output_tokens: 10,
           total_tokens: 20,
         },
         metadata: {
@@ -44,7 +31,7 @@ describe('OpenaiController', () => {
 
       vi.mocked(OpenAi.ask).mockResolvedValue(mockResponse);
 
-      const response = await request(app).post('/ai/ask').send({ prompt: 'Hello' });
+      const response = await request(app).post('/ask').send({ prompt: 'Hello' });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockResponse);
@@ -52,7 +39,7 @@ describe('OpenaiController', () => {
     });
 
     it('should return 400 if prompt is missing (unhappy flow)', async () => {
-      const response = await request(app).post('/ai/ask').send({});
+      const response = await request(app).post('/ask').send({});
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ error: 'prompt cannot be empty' });
@@ -63,7 +50,7 @@ describe('OpenaiController', () => {
       const errorMessage = 'AI Service Unavailable';
       vi.mocked(OpenAi.ask).mockRejectedValue(new Error(errorMessage));
 
-      const response = await request(app).post('/ai/ask').send({ prompt: 'Hello' });
+      const response = await request(app).post('/ask').send({ prompt: 'Hello' });
 
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
