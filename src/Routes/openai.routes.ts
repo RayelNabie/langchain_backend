@@ -23,9 +23,13 @@ const router: Router = Router();
  *               prompt:
  *                 type: string
  *                 example: "Explain in 2 sentences what the Bouncer Pattern is."
+ *               stream:
+ *                 type: boolean
+ *                 description: Whether to stream the response using Server-Sent Events
+ *                 example: false
  *     responses:
  *       200:
- *         description: Successfully generated response
+ *         description: Successfully generated response (JSON or Event Stream)
  *         content:
  *           application/json:
  *             schema:
