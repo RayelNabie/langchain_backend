@@ -18,9 +18,6 @@ type AskResponse =
   | { error: string; details?: string };
 
 export class OpenaiController {
-  /**
-   * Handles the /ask requests
-   */
   public static async ask(
     req: Request<Record<string, string>, AskResponse, AskRequest>,
     res: Response<AskResponse>,

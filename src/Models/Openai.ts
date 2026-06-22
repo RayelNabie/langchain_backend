@@ -24,13 +24,13 @@ export default class OpenAi {
 
   public static getInstance(): AzureChatOpenAI {
     if (!this.instance) {
-      const apiKey: string = openaiConfig.azureApiKey.value;
-      const instanceName: string = openaiConfig.azureInstanceName.value;
-      const deploymentName: string = openaiConfig.azureDeploymentName.value;
+      const apiKey: string = openaiConfig.azureApiKey;
+      const instanceName: string = openaiConfig.azureInstanceName;
+      const deploymentName: string = openaiConfig.azureDeploymentName;
 
       if (!apiKey || !instanceName || !deploymentName) {
         throw new Error(
-          '[OpenAi] Missing Azure OpenAI configuration. Please check your secrets files.',
+          '[OpenAi] Missing Azure OpenAI configuration. Please check your .env file.',
         );
       }
 
@@ -38,7 +38,7 @@ export default class OpenAi {
         azureOpenAIApiKey: apiKey,
         azureOpenAIApiInstanceName: instanceName,
         azureOpenAIApiDeploymentName: deploymentName,
-        azureOpenAIApiVersion: openaiConfig.azureApiVersion.value,
+        azureOpenAIApiVersion: openaiConfig.azureApiVersion,
         temperature: 0.7,
         maxRetries: 3,
         streaming: true,
