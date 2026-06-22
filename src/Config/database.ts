@@ -1,45 +1,29 @@
-import { getSecret, type SecretResult } from '#Utils/secrets.js';
-
 interface DatabaseConfig {
-  details: { url: string; source: string };
   url: string;
   safeUrl: string;
 }
 
 export const databaseConfig: DatabaseConfig = {
-  get details(): { url: string; source: string } {
+  get url(): string {
     if (process.env.DATABASE_URL) {
-      return { url: process.env.DATABASE_URL, source: 'env-DATABASE_URL' };
+      return process.env.DATABASE_URL;
     }
 
-    const userSecret: SecretResult = getSecret('pg_user', 'postgres');
-    const passSecret: SecretResult = getSecret('pg_pw', 'postgres');
+    const user = process.env.DB_USER ?? 'postgres';
+    const password = process.env.DB_PASSWORD ?? 'postgres';
+    const host = process.env.DB_HOST ?? 'postgres';
+    const port = process.env.DB_PORT ?? '5432';
+    const name = process.env.DB_NAME ?? 'postgres';
 
-    const host: string = process.env.DB_HOST || 'postgres';
-    const port: string = process.env.DB_PORT || '5432';
-    const dbName: string = process.env.DB_NAME || 'postgres';
-
-    return {
-      url: `postgresql://${userSecret.value}:${passSecret.value}@${host}:${port}/${dbName}?schema=public`,
-      source: `user:${userSecret.source}, pass:${passSecret.source}`,
-    };
+    return `postgresql://${user}:${password}@${host}:${port}/${name}?schema=public`;
   },
 
-  get url(): string {
-    return this.details.url;
-  },
-
-  /**
-   * Safe version of the URL for logging (masks password)
-   */
   get safeUrl(): string {
-    const { url: rawUrl } = this.details;
     try {
-      const url: URL = new URL(rawUrl);
+      const url = new URL(this.url);
       return `${url.protocol}//${url.username}:****@${url.host}${url.pathname}${url.search}`;
     } catch {
-      // If not a valid URL, just return masked version manually
-      return rawUrl.replace(/:([^@]+)@/, ':****@');
+      return this.url.replace(/:([^@]+)@/, ':****@');
     }
   },
 };

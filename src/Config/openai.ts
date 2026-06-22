@@ -1,31 +1,29 @@
-import { getSecret, type SecretResult } from '#Utils/secrets.js';
-
 interface OpenAiConfig {
-  azureApiKey: SecretResult;
-  azureInstanceName: SecretResult;
-  azureDeploymentName: SecretResult;
-  azureApiVersion: SecretResult;
-  azureEmbeddingsDeploymentName: SecretResult;
+  azureApiKey: string;
+  azureInstanceName: string;
+  azureDeploymentName: string;
+  azureApiVersion: string;
+  azureEmbeddingsDeploymentName: string;
 }
 
 export const openaiConfig: OpenAiConfig = {
-  get azureApiKey(): SecretResult {
-    return getSecret('azure_openai_api_key', '');
+  get azureApiKey(): string {
+    return process.env.AZURE_OPENAI_API_KEY ?? '';
   },
 
-  get azureInstanceName(): SecretResult {
-    return getSecret('azure_openai_api_instance_name', '');
+  get azureInstanceName(): string {
+    return process.env.AZURE_OPENAI_API_INSTANCE_NAME ?? '';
   },
 
-  get azureDeploymentName(): SecretResult {
-    return getSecret('azure_openai_api_deployment_name', '');
+  get azureDeploymentName(): string {
+    return process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME ?? '';
   },
 
-  get azureApiVersion(): SecretResult {
-    return getSecret('azure_openai_api_version', '2025-03-01-preview');
+  get azureApiVersion(): string {
+    return process.env.AZURE_OPENAI_API_VERSION ?? '2025-03-01-preview';
   },
 
-  get azureEmbeddingsDeploymentName(): SecretResult {
-    return getSecret('azure_openai_api_embeddings_deployment_name', '');
+  get azureEmbeddingsDeploymentName(): string {
+    return process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME ?? '';
   },
 };
