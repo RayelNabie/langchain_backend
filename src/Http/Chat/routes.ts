@@ -1,12 +1,12 @@
 /**
  * @file Defines the /chat route and its OpenAPI documentation.
  *
- * @module Http/Chat/routes
+ * @module http/chat/routes
  * @author RayelNabie
  */
 
 import { Router } from 'express';
-import { ChatController } from '#Http/Chat/ChatController.js';
+import { ChatController } from '#http/chat/ChatController.js';
 
 const router: Router = Router();
 

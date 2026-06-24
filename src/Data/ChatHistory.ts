@@ -3,12 +3,12 @@
  *       LlmAdapter implementation so history storage isn't duplicated
  *       per provider.
  *
- * @module Data/ChatHistory
+ * @module data/chatHistory
  * @author RayelNabie
  */
 
 import { PostgresChatMessageHistory } from '@langchain/community/stores/message/postgres';
-import { databaseConfig } from '#Data/config.js';
+import { databaseConfig } from '#data/config.js';
 
 export const getHistory = async (sessionId: string): Promise<PostgresChatMessageHistory> => {
   return new PostgresChatMessageHistory({

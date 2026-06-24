@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AIMessage, AIMessageChunk, type BaseMessage } from '@langchain/core/messages';
 import { IterableReadableStream } from '@langchain/core/utils/stream';
-import ChatService from '#Services/ChatService.js';
+import ChatService from '#services/ChatService.js';
 
 const mockAdapter = vi.hoisted(() => ({
   chat: vi.fn(),
   stream: vi.fn(),
 }));
 
-vi.mock('#Llm/LangChainAdapter.js', () => ({
+vi.mock('#llm/LangChainAdapter.js', () => ({
   default: vi.fn().mockImplementation(function () {
     return mockAdapter;
   }),

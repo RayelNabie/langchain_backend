@@ -1,13 +1,42 @@
 /**
  * @file Builds and validates the Azure OpenAI (LangChain) chat model.
  *
- * @module Llm/modelFactories/Azure/createAzureModel
+ * @module llm/factories/azure/azureFactory
  * @author RayelNabie
  */
 
 import { AzureChatOpenAI } from '@langchain/openai';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { azureConfig } from '#Llm/modelFactories/Azure/AzureConfig.js';
+
+interface AzureConfig {
+  azureApiKey: string;
+  azureInstanceName: string;
+  azureDeploymentName: string;
+  azureApiVersion: string;
+  azureEmbeddingsDeploymentName: string;
+}
+
+const azureConfig: AzureConfig = {
+  get azureApiKey(): string {
+    return process.env.AZURE_OPENAI_API_KEY ?? '';
+  },
+
+  get azureInstanceName(): string {
+    return process.env.AZURE_OPENAI_API_INSTANCE_NAME ?? '';
+  },
+
+  get azureDeploymentName(): string {
+    return process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME ?? '';
+  },
+
+  get azureApiVersion(): string {
+    return process.env.AZURE_OPENAI_API_VERSION ?? '2025-03-01-preview';
+  },
+
+  get azureEmbeddingsDeploymentName(): string {
+    return process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME ?? '';
+  },
+};
 
 export const createAzureModel = (): BaseChatModel => {
   const apiKey: string = azureConfig.azureApiKey;

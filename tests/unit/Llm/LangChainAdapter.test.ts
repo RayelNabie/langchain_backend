@@ -8,9 +8,9 @@ import {
   type BaseMessageChunk,
 } from '@langchain/core/messages';
 import { RunnableWithMessageHistory } from '@langchain/core/runnables';
-import LangChainAdapter from '#Llm/LangChainAdapter.js';
+import LangChainAdapter from '#llm/LangChainAdapter.js';
 
-vi.mock('#Data/ChatHistory.js', () => ({
+vi.mock('#data/chatHistory.js', () => ({
   getHistory: vi.fn(),
 }));
 

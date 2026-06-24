@@ -3,14 +3,14 @@
  *       delegates to ChatService, supporting both a plain JSON response
  *       and a Server-Sent Events stream.
  *
- * @module Http/Chat/ChatController
+ * @module http/chat/ChatController
  * @author RayelNabie
  */
 
 import { Request, Response } from 'express';
 import { AIMessage, type BaseMessage, type BaseMessageChunk } from '@langchain/core/messages';
-import ChatService from '#Services/ChatService.js';
-import type { ChatRequest, ChatResponse } from '#Http/Chat/types.js';
+import ChatService from '#services/ChatService.js';
+import type { ChatRequest, ChatResponse } from '#http/chat/types.js';
 
 export class ChatController {
   public static async chat(

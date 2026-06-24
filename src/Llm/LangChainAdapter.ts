@@ -4,7 +4,7 @@
  *       support via Postgres. Which provider it talks to is determined by
  *       the model factory injected into the constructor.
  *
- * @module Llm/LangChainAdapter
+ * @module llm/LangChainAdapter
  * @author RayelNabie
  */
 
@@ -18,8 +18,8 @@ import {
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { type RunnableConfig, RunnableWithMessageHistory } from '@langchain/core/runnables';
 import { IterableReadableStream } from '@langchain/core/utils/stream';
-import { getHistory } from '#Data/ChatHistory.js';
-import type { LlmAdapter } from '#Llm/types.js';
+import { getHistory } from '#data/chatHistory.js';
+import type { LlmAdapter } from '#llm/types.js';
 
 export default class LangChainAdapter implements LlmAdapter {
   private static readonly SYSTEM_PROMPT: string =

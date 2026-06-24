@@ -1,7 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AzureChatOpenAI } from '@langchain/openai';
-import { createAzureModel } from '#Llm/modelFactories/Azure/createAzureModel.js';
-import { azureConfig } from '#Llm/modelFactories/Azure/AzureConfig.js';
+import { createAzureModel } from '#llm/factories/azure/azureFactory.js';
 
 vi.mock('@langchain/openai', () => ({
   AzureChatOpenAI: vi.fn().mockImplementation(function () {
@@ -9,23 +8,23 @@ vi.mock('@langchain/openai', () => ({
   }),
 }));
 
-vi.mock('#Llm/modelFactories/Azure/AzureConfig.js', () => ({
-  azureConfig: {
-    azureApiKey: 'fake-key',
-    azureInstanceName: 'fake-instance',
-    azureDeploymentName: 'fake-deployment',
-    azureApiVersion: '2025-01-01',
-  },
-}));
-
 describe('createAzureModel', () => {
+  const originalEnv = { ...process.env };
+
   beforeEach(() => {
     vi.clearAllMocks();
-    azureConfig.azureApiKey = 'fake-key';
+    process.env.AZURE_OPENAI_API_KEY = 'fake-key';
+    process.env.AZURE_OPENAI_API_INSTANCE_NAME = 'fake-instance';
+    process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME = 'fake-deployment';
+    process.env.AZURE_OPENAI_API_VERSION = '2025-01-01';
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
   });
 
   it('should throw an error if configuration is missing', () => {
-    azureConfig.azureApiKey = '';
+    process.env.AZURE_OPENAI_API_KEY = '';
 
     expect(() => createAzureModel()).toThrow(
       '[createAzureModel] Missing Azure OpenAI configuration',

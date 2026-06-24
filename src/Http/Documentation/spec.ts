@@ -2,7 +2,7 @@
  * @file Builds the OpenAPI specification used to generate the Swagger
  *       documentation.
  *
- * @module Http/Documentation/spec
+ * @module http/documentation/spec
  * @author RayelNabie
  */
 
@@ -24,7 +24,7 @@ const options: swaggerJsdoc.Options = {
     ],
   },
 
-  apis: ['./src/Http/**/*.ts', './src/app.ts'],
+  apis: ['./src/http/**/*.ts', './src/app.ts'],
 };
 
 export const swaggerSpec: object = swaggerJsdoc(options);

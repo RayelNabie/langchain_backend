@@ -3,7 +3,7 @@
  * only depends on this interface, so swapping providers means writing a
  * new model factory, not touching the facade or controllers.
  *
- * @module Llm/LlmAdapter
+ * @module llm/LlmAdapter
  * @author RayelNabie
  */
 

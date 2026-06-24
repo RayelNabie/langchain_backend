@@ -1,13 +1,13 @@
 /**
  * @file Mounts the Swagger UI and the raw OpenAPI JSON document.
  *
- * @module Http/Documentation/routes
+ * @module http/documentation/routes
  * @author RayelNabie
  */
 
 import { Router, type Request, type Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from '#Http/Documentation/spec.js';
+import { swaggerSpec } from '#http/documentation/spec.js';
 
 const router: Router = Router();
 

@@ -3,9 +3,9 @@ import request, { type Response } from 'supertest';
 import { IterableReadableStream } from '@langchain/core/utils/stream';
 import { AIMessage, AIMessageChunk } from '@langchain/core/messages';
 import app from '#app.js';
-import ChatService from '#Services/ChatService.js';
+import ChatService from '#services/ChatService.js';
 
-vi.mock('#Services/ChatService.js', () => ({
+vi.mock('#services/ChatService.js', () => ({
   default: {
     chat: vi.fn(),
     stream: vi.fn(),

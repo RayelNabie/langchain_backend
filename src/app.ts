@@ -11,8 +11,8 @@ import 'dotenv/config';
 import express from 'express';
 import type { Express } from 'express';
 import type { Server } from 'node:http';
-import appRouter from '#Http/routes.js';
-import { connectDatabase } from '#Data/connect.js';
+import appRouter from '#http/routes.js';
+import { connectDatabase } from '#data/connect.js';
 
 const app: Express = express();
 const port: number = Number(process.env.PORT) || 3000;

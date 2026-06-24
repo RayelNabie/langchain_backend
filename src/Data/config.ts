@@ -2,11 +2,11 @@
  * @file Postgres connection configuration, derived from environment
  *       variables.
  *
- * @module Data/config
+ * @module data/config
  * @author RayelNabie
  */
 
-import type { DatabaseConfig } from '#Data/types.js';
+import type { DatabaseConfig } from '#data/types.js';
 
 export const databaseConfig: DatabaseConfig = {
   get url(): string {

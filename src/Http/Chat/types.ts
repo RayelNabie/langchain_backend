@@ -1,7 +1,7 @@
 /**
  * @file Body shape for the /chat endpoint.
  *
- * @module Http/Chat/types
+ * @module http/chat/types
  * @author RayelNabie
  */
 

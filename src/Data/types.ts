@@ -1,7 +1,7 @@
 /**
  * @file Shape of the Postgres connection configuration.
  *
- * @module Data/types
+ * @module data/types
  * @author RayelNabie
  */
 

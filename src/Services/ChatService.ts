@@ -3,15 +3,15 @@
  *       to the active LlmAdapter, so callers never depend on a specific
  *       provider.
  *
- * @module Services/ChatService
+ * @module services/ChatService
  * @author RayelNabie
  */
 
 import type { BaseMessage, BaseMessageChunk } from '@langchain/core/messages';
 import type { IterableReadableStream } from '@langchain/core/utils/stream';
-import LangChainAdapter from '#Llm/LangChainAdapter.js';
-import { createAzureModel } from '#Llm/modelFactories/Azure/createAzureModel.js';
-import type { LlmAdapter } from '#Llm/types.js';
+import LangChainAdapter from '#llm/LangChainAdapter.js';
+import { createAzureModel } from '#llm/factories/azure/azureFactory.js';
+import type { LlmAdapter } from '#llm/types.js';
 
 export default class ChatService {
   private static readonly adapter: LlmAdapter = new LangChainAdapter(createAzureModel);

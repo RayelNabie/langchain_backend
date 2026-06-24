@@ -1,12 +1,12 @@
 /**
  * @file Verifies the Postgres connection is reachable at startup.
  *
- * @module Data/connect
+ * @module data/connect
  * @author RayelNabie
  */
 
 import { Pool } from 'pg';
-import { databaseConfig } from '#Data/config.js';
+import { databaseConfig } from '#data/config.js';
 
 export const connectDatabase: () => Promise<void> = async (): Promise<void> => {
   console.log(`[Database] Attempting connection to ${databaseConfig.safeUrl}`);

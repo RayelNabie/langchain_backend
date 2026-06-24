@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { PostgresChatMessageHistory } from '@langchain/community/stores/message/postgres';
-import { getHistory } from '#Data/ChatHistory.js';
+import { getHistory } from '#data/chatHistory.js';
 
 vi.mock('@langchain/community/stores/message/postgres', () => ({
   PostgresChatMessageHistory: vi.fn().mockImplementation(function () {
@@ -11,7 +11,7 @@ vi.mock('@langchain/community/stores/message/postgres', () => ({
   }),
 }));
 
-vi.mock('#Data/config.js', () => ({
+vi.mock('#data/config.js', () => ({
   databaseConfig: { url: 'postgresql://fake' },
 }));
 
