@@ -3,21 +3,21 @@ import request, { type Response } from 'supertest';
 import { IterableReadableStream } from '@langchain/core/utils/stream';
 import { AIMessage, AIMessageChunk } from '@langchain/core/messages';
 import app from '#app.js';
-import OpenAi from '#Models/Openai.js';
+import ChatService from '#Services/ChatService.js';
 
-vi.mock('#Models/Openai.js', () => ({
+vi.mock('#Services/ChatService.js', () => ({
   default: {
-    ask: vi.fn(),
+    chat: vi.fn(),
     stream: vi.fn(),
   },
 }));
 
-describe('OpenaiController', () => {
+describe('ChatController', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('POST /ask', () => {
+  describe('POST /chat', () => {
     it('should return 200 and AI response for a valid prompt (happy flow)', async () => {
       const mockResponse = new AIMessage({
         content: 'Hello, I am an AI!',
@@ -31,9 +31,9 @@ describe('OpenaiController', () => {
         },
       });
 
-      vi.mocked(OpenAi.ask).mockResolvedValue(mockResponse);
+      vi.mocked(ChatService.chat).mockResolvedValue(mockResponse);
 
-      const response: Response = await request(app).post('/ask').send({ prompt: 'Hello' });
+      const response: Response = await request(app).post('/chat').send({ prompt: 'Hello' });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
@@ -47,7 +47,7 @@ describe('OpenaiController', () => {
           modelName: 'gpt-4',
         },
       });
-      expect(OpenAi.ask).toHaveBeenCalledWith('Hello', undefined);
+      expect(ChatService.chat).toHaveBeenCalledWith('Hello', undefined);
     });
 
     it('should return SSE stream if stream is true', async () => {
@@ -58,10 +58,10 @@ describe('OpenaiController', () => {
         })(),
       );
 
-      vi.mocked(OpenAi.stream).mockResolvedValue(mockStream);
+      vi.mocked(ChatService.stream).mockResolvedValue(mockStream);
 
       const response: Response = await request(app)
-        .post('/ask')
+        .post('/chat')
         .send({ prompt: 'Hello', stream: true });
 
       expect(response.status).toBe(200);
@@ -69,22 +69,22 @@ describe('OpenaiController', () => {
       expect(response.text).toContain('data: {"content":"Chunk 1","metadata":{}}');
       expect(response.text).toContain('data: {"content":"Chunk 2","metadata":{}}');
       expect(response.text).toContain('event: end');
-      expect(OpenAi.stream).toHaveBeenCalledWith('Hello', undefined);
+      expect(ChatService.stream).toHaveBeenCalledWith('Hello', undefined);
     });
 
     it('should return 400 if prompt is missing (unhappy flow)', async () => {
-      const response: Response = await request(app).post('/ask').send({});
+      const response: Response = await request(app).post('/chat').send({});
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ error: 'prompt cannot be empty' });
-      expect(OpenAi.ask).not.toHaveBeenCalled();
+      expect(ChatService.chat).not.toHaveBeenCalled();
     });
 
     it('should return 500 if AI model throws an error (unhappy flow)', async () => {
       const errorMessage = 'AI Service Unavailable';
-      vi.mocked(OpenAi.ask).mockRejectedValue(new Error(errorMessage));
+      vi.mocked(ChatService.chat).mockRejectedValue(new Error(errorMessage));
 
-      const response: Response = await request(app).post('/ask').send({ prompt: 'Hello' });
+      const response: Response = await request(app).post('/chat').send({ prompt: 'Hello' });
 
       expect(response.status).toBe(500);
       expect(response.body).toEqual({

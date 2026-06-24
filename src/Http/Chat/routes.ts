@@ -1,11 +1,18 @@
+/**
+ * @file Defines the /chat route and its OpenAPI documentation.
+ *
+ * @module Http/Chat/routes
+ * @author RayelNabie
+ */
+
 import { Router } from 'express';
-import { OpenaiController } from '#Http/Controllers/OpenaiController.js';
+import { ChatController } from '#Http/Chat/ChatController.js';
 
 const router: Router = Router();
 
 /**
  * @openapi
- * /ask:
+ * /chat:
  *   post:
  *     summary: Ask the OpenAI LLM a question
  *     description: Sends a prompt to Azure OpenAI via LangChain and returns the response including metadata (such as token usage).
@@ -91,6 +98,6 @@ const router: Router = Router();
  *                   type: string
  *                   example: "Service connection timeout"
  */
-router.post('/ask', OpenaiController.ask);
+router.post('/chat', ChatController.chat);
 
 export default router;

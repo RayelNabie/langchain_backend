@@ -1,26 +1,21 @@
+/**
+ * @file HTTP controller for the /chat endpoint. Validates the request and
+ *       delegates to ChatService, supporting both a plain JSON response
+ *       and a Server-Sent Events stream.
+ *
+ * @module Http/Chat/ChatController
+ * @author RayelNabie
+ */
+
 import { Request, Response } from 'express';
-import {
-  AIMessage,
-  type BaseMessage,
-  type BaseMessageChunk,
-  type ResponseMetadata,
-  type UsageMetadata,
-} from '@langchain/core/messages';
-import OpenAi from '#Models/Openai.js';
-import type AskRequest from '#Types/AskRequest.js';
+import { AIMessage, type BaseMessage, type BaseMessageChunk } from '@langchain/core/messages';
+import ChatService from '#Services/ChatService.js';
+import type { ChatRequest, ChatResponse } from '#Http/Chat/types.js';
 
-type AskResponse =
-  | {
-      answer: BaseMessage['content'];
-      metadata: ResponseMetadata;
-      usage?: UsageMetadata;
-    }
-  | { error: string; details?: string };
-
-export class OpenaiController {
-  public static async ask(
-    req: Request<Record<string, string>, AskResponse, AskRequest>,
-    res: Response<AskResponse>,
+export class ChatController {
+  public static async chat(
+    req: Request<Record<string, string>, ChatResponse, ChatRequest>,
+    res: Response<ChatResponse>,
   ): Promise<void> {
     try {
       const { prompt, stream, sessionId } = req.body;
@@ -36,7 +31,7 @@ export class OpenaiController {
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
-        const streamResponse: AsyncIterable<BaseMessageChunk> = await OpenAi.stream(
+        const streamResponse: AsyncIterable<BaseMessageChunk> = await ChatService.stream(
           prompt,
           sessionId,
         );
@@ -54,7 +49,7 @@ export class OpenaiController {
         return;
       }
 
-      const result: BaseMessage = await OpenAi.ask(prompt, sessionId);
+      const result: BaseMessage = await ChatService.chat(prompt, sessionId);
 
       res.json({
         answer: result.content,

@@ -129,9 +129,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-secrets/
-certs/
-data/
+/data/
 build
 
 #editor settings
