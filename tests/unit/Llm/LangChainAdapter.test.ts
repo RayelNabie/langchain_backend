@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AzureChatOpenAI } from '@langchain/openai';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import {
   AIMessage,
   SystemMessage,
@@ -8,28 +8,11 @@ import {
   type BaseMessageChunk,
 } from '@langchain/core/messages';
 import { RunnableWithMessageHistory } from '@langchain/core/runnables';
-import OpenAi from '#Models/Openai.js';
-import { openaiConfig } from '#Config/openai.js';
+import LangChainAdapter from '#Llm/LangChainAdapter.js';
 
-vi.mock('@langchain/openai', () => {
-  return {
-    AzureChatOpenAI: vi.fn().mockImplementation(function () {
-      return {
-        invoke: vi.fn(),
-        stream: vi.fn(),
-      };
-    }),
-  };
-});
-
-vi.mock('@langchain/community/stores/message/postgres', () => {
-  return {
-    PostgresChatMessageHistory: vi.fn().mockImplementation(() => ({
-      getMessages: vi.fn().mockResolvedValue([]),
-      addMessage: vi.fn().mockResolvedValue(undefined),
-    })),
-  };
-});
+vi.mock('#Data/ChatHistory.js', () => ({
+  getHistory: vi.fn(),
+}));
 
 vi.mock('@langchain/core/runnables', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@langchain/core/runnables')>();
@@ -53,40 +36,22 @@ vi.mock('@langchain/core/runnables', async (importOriginal) => {
   };
 });
 
-vi.mock('#Config/openai.js', () => ({
-  openaiConfig: {
-    azureApiKey: { value: 'fake-key' },
-    azureInstanceName: { value: 'fake-instance' },
-    azureDeploymentName: { value: 'fake-deployment' },
-    azureApiVersion: { value: '2025-01-01' },
-  },
-}));
-
-describe('OpenAi Model', () => {
+describe('LangChainAdapter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    OpenAi.reset();
   });
 
-  it('should throw an error if configuration is missing', async () => {
-    openaiConfig.azureApiKey.value = '';
+  it('should only call the injected model factory once per adapter instance', async () => {
+    const createModel = vi.fn().mockReturnValue({ invoke: vi.fn(), stream: vi.fn() } as never);
+    const adapter = new LangChainAdapter(createModel);
 
-    await expect(OpenAi.ask('Hello')).rejects.toThrow(
-      '[OpenAi] Missing Azure OpenAI configuration',
-    );
-  });
+    await adapter.chat('Hello AI');
+    await adapter.chat('Hello again');
 
-  it('should return the same instance of AzureChatOpenAI (singleton)', () => {
-    openaiConfig.azureApiKey.value = 'valid-key';
-    const instance1 = OpenAi.getInstance();
-    const instance2 = OpenAi.getInstance();
-    expect(instance1).toBe(instance2);
-    expect(AzureChatOpenAI).toHaveBeenCalledTimes(1);
+    expect(createModel).toHaveBeenCalledTimes(1);
   });
 
   it('should call invoke and return formatted response (happy flow)', async () => {
-    openaiConfig.azureApiKey.value = 'valid-key';
-
     const mockInvoke = vi.fn().mockResolvedValue(
       new AIMessage({
         content: 'AI Response',
@@ -98,14 +63,10 @@ describe('OpenAi Model', () => {
         response_metadata: { model: 'gpt-4' },
       }),
     );
+    const createModel = vi.fn().mockReturnValue({ invoke: mockInvoke } as unknown as BaseChatModel);
+    const adapter = new LangChainAdapter(createModel);
 
-    vi.mocked(AzureChatOpenAI).mockImplementation(function () {
-      return {
-        invoke: mockInvoke,
-      } as unknown as AzureChatOpenAI;
-    });
-
-    const result: BaseMessage = await OpenAi.ask('Hello AI');
+    const result: BaseMessage = await adapter.chat('Hello AI');
 
     expect(result.content).toBe('AI Response');
     if (AIMessage.isInstance(result)) {
@@ -129,22 +90,16 @@ describe('OpenAi Model', () => {
   });
 
   it('should call stream and return an async iterable', async () => {
-    openaiConfig.azureApiKey.value = 'valid-key';
-
     const mockStream = vi.fn().mockResolvedValue({
       [Symbol.asyncIterator]: async function* () {
         yield { content: 'Chunk 1', response_metadata: {} };
         yield { content: 'Chunk 2', response_metadata: {} };
       },
     });
+    const createModel = vi.fn().mockReturnValue({ stream: mockStream } as unknown as BaseChatModel);
+    const adapter = new LangChainAdapter(createModel);
 
-    vi.mocked(AzureChatOpenAI).mockImplementation(function () {
-      return {
-        stream: mockStream,
-      } as unknown as AzureChatOpenAI;
-    });
-
-    const stream: AsyncIterable<BaseMessageChunk> = await OpenAi.stream('Hello AI');
+    const stream: AsyncIterable<BaseMessageChunk> = await adapter.stream('Hello AI');
     const chunks: BaseMessageChunk[] = [];
     for await (const chunk of stream) {
       chunks.push(chunk);
@@ -159,18 +114,20 @@ describe('OpenAi Model', () => {
   });
 
   it('should use RunnableWithMessageHistory when sessionId is provided', async () => {
-    openaiConfig.azureApiKey.value = 'valid-key';
+    const createModel = vi.fn().mockReturnValue({} as BaseChatModel);
+    const adapter = new LangChainAdapter(createModel);
 
-    const result: BaseMessage = await OpenAi.ask('Hello AI', 'session-123');
+    const result: BaseMessage = await adapter.chat('Hello AI', 'session-123');
 
     expect(RunnableWithMessageHistory).toHaveBeenCalled();
     expect(result.content).toBe('Response with history');
   });
 
   it('should use RunnableWithMessageHistory for streaming when sessionId is provided', async () => {
-    openaiConfig.azureApiKey.value = 'valid-key';
+    const createModel = vi.fn().mockReturnValue({} as BaseChatModel);
+    const adapter = new LangChainAdapter(createModel);
 
-    const stream: AsyncIterable<BaseMessageChunk> = await OpenAi.stream('Hello AI', 'session-123');
+    const stream: AsyncIterable<BaseMessageChunk> = await adapter.stream('Hello AI', 'session-123');
     const chunks: BaseMessageChunk[] = [];
     for await (const chunk of stream) {
       chunks.push(chunk);

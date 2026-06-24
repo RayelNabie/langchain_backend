@@ -1,13 +1,19 @@
+/**
+ * @file Aggregates all application routes and provides the 404 fallback.
+ *
+ * @module Http/routes
+ * @author RayelNabie
+ */
+
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import openaiRoutes from '#Routes/openai.routes.js';
+import chatRoutes from '#Http/Chat/routes.js';
+import swaggerRoutes from '#Http/Documentation/routes.js';
 
 const appRouter: Router = Router();
 
-/**
- * Register specific routes
- */
-appRouter.use('/', openaiRoutes);
+appRouter.use('/', chatRoutes);
+appRouter.use('/', swaggerRoutes);
 
 /**
  * Fallback for non-existent routes

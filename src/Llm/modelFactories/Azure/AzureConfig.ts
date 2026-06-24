@@ -1,12 +1,13 @@
-interface OpenAiConfig {
-  azureApiKey: string;
-  azureInstanceName: string;
-  azureDeploymentName: string;
-  azureApiVersion: string;
-  azureEmbeddingsDeploymentName: string;
-}
+/**
+ * @file Azure OpenAI configuration, derived from environment variables.
+ *
+ * @module Llm/modelFactories/Azure/AzureConfig
+ * @author RayelNabie
+ */
 
-export const openaiConfig: OpenAiConfig = {
+import type { AzureConfig } from '#Llm/modelFactories/Azure/types.js';
+
+export const azureConfig: AzureConfig = {
   get azureApiKey(): string {
     return process.env.AZURE_OPENAI_API_KEY ?? '';
   },

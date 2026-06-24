@@ -3,20 +3,16 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-      target: builder
       args:
         NODE_VERSION: 24
-    command: yarn run dev
     env_file:
       - .env
-    volumes:
-      - .:/app/
-      - /app/node_modules
     ports:
       - '3000:3000'
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
   postgres:
     image: postgres:18.3-alpine
     container_name: postgres
