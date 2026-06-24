@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AzureChatOpenAI } from '@langchain/openai';
-import { createAzureModel } from '#Llm/modelFactories/createAzureModel.js';
-import { azureConfig } from '#Llm/modelFactories/AzureConfig.js';
+import { createAzureModel } from '#Llm/modelFactories/Azure/createAzureModel.js';
+import { azureConfig } from '#Llm/modelFactories/Azure/AzureConfig.js';
 
 vi.mock('@langchain/openai', () => ({
   AzureChatOpenAI: vi.fn().mockImplementation(function () {
@@ -9,7 +9,7 @@ vi.mock('@langchain/openai', () => ({
   }),
 }));
 
-vi.mock('#Llm/modelFactories/AzureConfig.js', () => ({
+vi.mock('#Llm/modelFactories/Azure/AzureConfig.js', () => ({
   azureConfig: {
     azureApiKey: 'fake-key',
     azureInstanceName: 'fake-instance',
