@@ -22,6 +22,8 @@ import { getHistory } from '#data/chatHistory.js';
 import type { LlmAdapter } from '#llm/types.js';
 
 export default class LangChainAdapter implements LlmAdapter {
+  constructor(private readonly createModel: () => BaseChatModel) {}
+
   private static readonly SYSTEM_PROMPT: string =
     'Je bent de AI Coach van een voetbal-app die spelers helpt bij het tracken en loggen van hun voetbal-drills, vergelijkbaar met de Hevy-app. ' +
     'Je bent een expert in jeugdvoetbal en baseert je advies op de methodiek van jeugdvoetbalcoach.nl. ' +
@@ -30,8 +32,6 @@ export default class LangChainAdapter implements LlmAdapter {
     'Je toon is motiverend, duidelijk en deskundig.';
 
   private model: BaseChatModel | null = null;
-
-  constructor(private readonly createModel: () => BaseChatModel) {}
 
   private getModel(): BaseChatModel {
     if (!this.model) {
