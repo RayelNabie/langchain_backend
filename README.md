@@ -1,4 +1,4 @@
-# langchain_backend
+# langchain_llm_api
 
 Express + TypeScript backend that exposes a `/chat` endpoint with modular support for Azure OpenAI via LangChain. Modularity is achieved by using a Adapter pattern, makes changing to another LLM like claude easier since the abstractionlayer ensures the logic doesnt need changing, only the adapter. Supports single-turn chat, streaming, and session-based conversation history stored in PostgreSQL.
 
